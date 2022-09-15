@@ -1,0 +1,12 @@
+body {
+  border: 2px solid red;
+}
+
+.details {
+  background-color: #ffc0cb;
+  color: blue;
+  text-align: right;
+  border-color: black;
+  width: 140px;
+  height: 100%;
+}
