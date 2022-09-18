@@ -1,12 +1,50 @@
 body {
-  border: 2px solid red;
+  color: #cfc9c2;
 }
 
-.details {
-  background-color: #ffc0cb;
-  color: blue;
+.container {
+  height: 100px;
+  width: 150px;
+  padding: 0px 10px 0px 10px;
+  /* border: 1px solid black; */
+  /* margin: 0 auto;
+  margin-top: 7rem; */
+  /* background-color: #15273f;
+  border-radius: 15px; */
+}
+
+.title {
+  /* font-size: 1.2em; */
+  /* margin: 0px 20px 0px 20px; */
+  color: #cfc9c2;
+  font-family: 'Tahoma';
+}
+
+.description {
+  text-align: justify;
+}
+
+.value {
+  font-size: 1em;
+  /* margin: 0px 20px 0px 20px; */
+  color: #f7768e;
+  font-family: 'Tahoma';
+}
+
+/* .divide {
+  background-color: #565f89;
+} */
+
+.date {
+  font-size: 0.7em;
+  text-align: center;
+  color: #a9b1d6;
+}
+
+.seller {
+  font-size: 1em;
   text-align: right;
-  border-color: black;
-  width: 140px;
-  height: 100%;
+  /* margin: 0px 20px 0px 20px; */
+  color: #23dedf;
+  font-family: 'Tahoma';
 }
