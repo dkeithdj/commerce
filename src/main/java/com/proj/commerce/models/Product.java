@@ -11,13 +11,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "product")
 public class Product {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  // @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence",
+  // allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   private String title;
@@ -29,8 +32,8 @@ public class Product {
   // @JoinColumn(name = "user_id", referencedColumnName = "id", foreignKey =
   // @ForeignKey(name = "user_product_fk"))
   @ManyToOne
-  @JoinColumn(name = "user_info_id")
-  private UserInfo user_info;
+  @JoinColumn(name = "user_id")
+  private Client client;
 
   private String image;
 
@@ -78,12 +81,12 @@ public class Product {
     this.price = price;
   }
 
-  public UserInfo getUser() {
-    return user_info;
+  public Client getClient() {
+    return client;
   }
 
-  public void setUser(UserInfo user) {
-    this.user_info = user;
+  public void setClient(Client user) {
+    this.client = user;
   }
 
   public String getImage() {
