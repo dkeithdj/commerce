@@ -8,11 +8,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.proj.commerce.models.UserInfo;
+import com.proj.commerce.models.Product;
+import com.proj.commerce.models.Client;
 
 @Repository
 @Transactional
-public interface UserRepository extends JpaRepository<UserInfo, Long> {
+public interface ClientRepository extends JpaRepository<Client, Long> {
   // UserInfo findByUsernameToPassword(String username, String password);
   // @Query("SELECT a FROM USER_INFO a WHERE a.username=:u AND a.password=:p")
   // List<UserInfo> findUser(@Param("u") String username, @Param("p") String
