@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -13,14 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.security.auth.login.AccountException;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -38,24 +34,15 @@ import org.apache.commons.io.FileUtils;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.ocpsoft.prettytime.PrettyTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.proj.commerce.models.Product;
 import com.proj.commerce.models.Client;
-import com.proj.commerce.repositories.ProductRepository;
 import com.proj.commerce.repositories.ClientRepository;
 import com.proj.commerce.service.ProductService;
 import com.proj.commerce.ui.UI;
 import com.proj.commerce.ui.UI.CustomLabel;
-import com.proj.commerce.ui.UI.CustomPanel;
 
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
-import ch.qos.logback.core.util.FileUtil;
 import net.miginfocom.swing.MigLayout;
-import com.proj.commerce.UtilBean;
 
 import com.github.rjeschke.txtmark.Processor;
 
@@ -67,16 +54,28 @@ import com.github.rjeschke.txtmark.Processor;
  */
 public class Views extends JFrame {
 
-    @Autowired
+    // @Autowired
     private ProductService productService;
-    @Autowired
-    private ApplicationContext context;
+    private ClientRepository clientRepository;
+    // @Autowired
+    // private ApplicationContext context;
 
-    @Autowired
-    private ConfigurableApplicationContext applicationContext;
+    // @Autowired
+    // private ConfigurableApplicationContext applicationContext;
 
     private List<Product> products;
     private List<Client> users;
+    private Client loggedInClient;
+    private boolean isLoggedIn = false;
+
+    private JPanel navPnl;
+
+    private JLabel title;
+    private JButton account;
+    private JButton sell;
+    private JButton loginButton;
+    private JButton registerButton;
+    private JButton logoutButton;
 
     // Card assembly per products
 
@@ -194,11 +193,11 @@ public class Views extends JFrame {
     }
 
     public JPanel nav() {
-        JPanel pnl = new UI().new CustomPanel();
-        pnl.setLayout(new MigLayout("", "[][][]"));
-        pnl.setBackground(new UI().bg2);
+        navPnl = new UI().new CustomPanel();
+        navPnl.setLayout(new MigLayout("", "[][][]"));
+        navPnl.setBackground(new UI().bg2);
 
-        JLabel title = new UI().new CustomLabel("<html><font size=14>Commerce</html>");
+        title = new UI().new CustomLabel("<html><font size=14>Commerce</html>");
         title.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -219,7 +218,7 @@ public class Views extends JFrame {
             }
 
         });
-        JButton account = new UI().new CustomButton("{username}");
+        account = new UI().new CustomButton();
         account.setBackground(new UI().blue0);
         account.addActionListener(new ActionListener() {
 
@@ -228,19 +227,8 @@ public class Views extends JFrame {
                 bodyPnl.removeAll();
                 // productService = (ProductService) context.getBean("productService");
                 productService = (ProductService) UtilBean.getBean(ProductService.class);
-                // ClientRepository clientRepository = (ClientRepository)
-                // UtilBean.getBean(ClientRepository.class);
-                // ProductRepository producRepository = (ProductRepository)
-                // UtilBean.getBean(ProductRepository.class);
 
-                // List<Product> clientProducts = new ArrayList<>();
-                // products.forEach(p -> {
-                // if (p.getClient().getId() == 1L) {
-                // clientProducts.add(p);
-                // }
-                // });
-                // bodyPnl.add(card(clientProducts));
-                bodyPnl.add(card(productService.fetchProductListByClient(2L)));
+                bodyPnl.add(card(productService.fetchProductListByClient(loggedInClient.getId())));
                 // bodyPnl.add(card());
                 mainPnl.revalidate();
                 mainPnl.repaint();
@@ -249,7 +237,7 @@ public class Views extends JFrame {
 
         });
 
-        JButton sell = new UI().new CustomButton("Sell");
+        sell = new UI().new CustomButton("Sell");
         sell.setBackground(new UI().blue1);
 
         sell.addActionListener(new ActionListener() {
@@ -257,7 +245,7 @@ public class Views extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 bodyPnl.removeAll();
-                bodyPnl.add(newProductForm(products.get(0).getClient()));
+                bodyPnl.add(newProductForm());
                 mainPnl.revalidate();
                 mainPnl.repaint();
                 // listingPnl.setComponentZOrder(loginForm(), 5);
@@ -266,7 +254,7 @@ public class Views extends JFrame {
 
         });
 
-        JButton loginButton = new UI().new CustomButton("Login");
+        loginButton = new UI().new CustomButton("Login");
         loginButton.setBackground(new UI().green0);
 
         loginButton.addActionListener(new ActionListener() {
@@ -282,10 +270,28 @@ public class Views extends JFrame {
             }
 
         });
-        JButton logoutButton = new UI().new CustomButton("Logout");
+        logoutButton = new UI().new CustomButton("Logout");
         logoutButton.setBackground(new UI().red);
 
-        JButton registerButton = new UI().new CustomButton("Register");
+        logoutButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loggedInClient = null;
+                navPnl.removeAll();
+                navPnl.add(title);
+                navPnl.add(loginButton, "push, al right");
+                navPnl.add(registerButton);
+
+                bodyPnl.removeAll();
+                bodyPnl.add(card(products));
+                mainPnl.revalidate();
+                mainPnl.repaint();
+            }
+
+        });
+
+        registerButton = new UI().new CustomButton("Register");
         registerButton.setBackground(new UI().orange0);
         registerButton.addActionListener(new ActionListener() {
 
@@ -299,35 +305,15 @@ public class Views extends JFrame {
 
         });
 
-        pnl.add(title);
-        pnl.add(account);
-        pnl.add(sell);
+        navPnl.add(title);
+        // pnl.add(account);
+        // pnl.add(sell);
 
-        pnl.add(loginButton, "push, al right");
-        pnl.add(registerButton);
-        pnl.add(logoutButton);
-        return pnl;
+        navPnl.add(loginButton, "push,al right");
+        navPnl.add(registerButton);
+        // pnl.add(logoutButton, "push,al right");
+        return navPnl;
 
-    }
-
-    public void listings() {
-        bodyPnl = new UI().new CustomPanel();
-        bodyPnl.setLayout(new BorderLayout());
-
-        mainPnl.add(nav(), BorderLayout.NORTH);
-        bodyPnl.add(card(products), BorderLayout.CENTER);
-
-        mainPnl.add(bodyPnl, BorderLayout.CENTER);
-
-        JScrollPane scroll = new JScrollPane(mainPnl);
-
-        add(scroll);
-        pack();
-        setVisible(true);
-        setSize(1000, 600);
-        setMinimumSize(new Dimension(880, 400));
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     // TODO add login validation
@@ -341,12 +327,28 @@ public class Views extends JFrame {
         JLabel password = new UI().new CustomLabel("Password: ");
         JPasswordField passwordIn = new UI().new CustomPasswordField(15);
 
-        JButton loginButton = new UI().new CustomButton("Login");
-        loginButton.setBackground(new UI().green0);
-        loginButton.addActionListener(new ActionListener() {
+        JButton login = new UI().new CustomButton("Login");
+        login.setBackground(new UI().green0);
+        login.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                clientRepository = (ClientRepository) UtilBean.getBean(ClientRepository.class);
+                loggedInClient = clientRepository.findByUsernameAndPassword(usernameIn.getText(),
+                        String.valueOf(passwordIn.getPassword()));
+                if (loggedInClient != null) {
+                    navPnl.removeAll();
+
+                    account.setText(loggedInClient.getUsername());
+                    navPnl.add(title);
+                    navPnl.add(account);
+                    navPnl.add(sell);
+                    navPnl.add(logoutButton, "push, al right");
+                }
+                bodyPnl.removeAll();
+                bodyPnl.add(card(products));
+                mainPnl.revalidate();
+                mainPnl.repaint();
 
             }
 
@@ -356,7 +358,7 @@ public class Views extends JFrame {
         pnl.add(usernameIn, "wrap");
         pnl.add(password);
         pnl.add(passwordIn, "wrap");
-        pnl.add(loginButton, "skip, al right");
+        pnl.add(login, "skip, al right");
 
         return pnl;
     }
@@ -425,14 +427,14 @@ public class Views extends JFrame {
         return productPnl;
     }
 
-    public JPanel newProductForm(Client client) {
+    public JPanel newProductForm() {
         // user.getProduct().get(0);
         JPanel productForm = new UI().new CustomPanel();
         productForm.setLayout(new MigLayout("wrap, alignx center", "[][]"));
         JLabel title = new UI().new CustomLabel("Title: ");
-        JTextField titleIn = new UI().new CustomTextField(15);
+        JTextField titleIn = new UI().new CustomTextField(20);
         JLabel description = new UI().new CustomLabel("Description: ");
-        JTextArea descriptionIn = new JTextArea(10, 16);
+        JTextArea descriptionIn = new JTextArea(10, 25);
         descriptionIn.setLineWrap(true);
         JLabel descriptionNote = new UI().new CustomLabel("(Supports Markdown Syntax)");
         JLabel price = new UI().new CustomLabel("Price: ");
@@ -446,7 +448,7 @@ public class Views extends JFrame {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("images", "png", "jpg", "jpeg", "gif");
         imageIn.addChoosableFileFilter(filter);
 
-        File destination = new File("./data/" + client.getId());
+        File destination = new File("./data/" + loggedInClient.getId());
 
         JButton imageButton = new UI().new CustomButton("Open");
         JLabel status = new UI().new CustomLabel("None");
@@ -492,6 +494,7 @@ public class Views extends JFrame {
                     if (c == 0) {
                         String newImagePath = new File(destination, file.getName()).toString();
                         FileUtils.copyFileToDirectory(file, destination);
+                        Double.parseDouble(priceIn.getText());
                         // productService
                         // .saveProduct(new Product(titleIn.getText(), MDtoHTML,
                         // Double.parseDouble(priceIn.getText()),
@@ -503,8 +506,11 @@ public class Views extends JFrame {
                 } catch (NullPointerException n1) {
                     imageButton.setBackground(new UI().red);
                     // n1.printStackTrace();
+                } catch (NumberFormatException num1) {
+                    price.setForeground(new UI().red);
+                    stock.setForeground(new UI().red);
+                    // num1.printStackTrace();
                 }
-
             }
 
         });
@@ -525,4 +531,25 @@ public class Views extends JFrame {
 
         return productForm;
     }
+
+    public void listings() {
+        bodyPnl = new UI().new CustomPanel();
+        bodyPnl.setLayout(new BorderLayout());
+
+        mainPnl.add(nav(), BorderLayout.NORTH);
+        bodyPnl.add(card(products), BorderLayout.CENTER);
+
+        mainPnl.add(bodyPnl, BorderLayout.CENTER);
+
+        JScrollPane scroll = new JScrollPane(mainPnl);
+
+        add(scroll);
+        pack();
+        setVisible(true);
+        setSize(1000, 600);
+        setMinimumSize(new Dimension(880, 400));
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
 }
