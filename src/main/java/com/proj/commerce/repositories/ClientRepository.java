@@ -14,6 +14,8 @@ import com.proj.commerce.models.Client;
 @Repository
 @Transactional
 public interface ClientRepository extends JpaRepository<Client, Long> {
+
+  Client findByUsernameAndPassword(String username, String password);
   // UserInfo findByUsernameToPassword(String username, String password);
   // @Query("SELECT a FROM USER_INFO a WHERE a.username=:u AND a.password=:p")
   // List<UserInfo> findUser(@Param("u") String username, @Param("p") String
