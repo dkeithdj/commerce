@@ -28,9 +28,9 @@ public class CommerceApplication extends JFrame {
 
 		ClientRepository clientRepository = configurableApplicationContext.getBean(ClientRepository.class);
 		ProductRepository productRepository = configurableApplicationContext.getBean(ProductRepository.class);
-		// Client foo = new Client("foo", "foo01");
-		// Client bar = new Client("bar", "bar01");
-		// Client baz = new Client("baz", "baz01");
+		// Client foo = new Client("foo", "foo01", 10000);
+		// Client bar = new Client("bar", "bar01", 100000);
+		// Client baz = new Client("baz", "baz01", 100000);
 
 		// Product keyb = new Product("40D Keyboard", "A 40% mechanical keyboard",
 		// 2400d, "40D1080Side.png", 1);
@@ -54,9 +54,8 @@ public class CommerceApplication extends JFrame {
 		// clientRepository.saveAll(List.of(foo, bar, baz));
 
 		// Product case40 = new Product("40D Case", "A 40D Keyboard case", 100d,
-		// "40DnoPCB.PNG", 1);
-		// Product pcb = new Product("Mona v.1.1", "A Mona PCB for mechanical
-		// keyboards", 100d, "reference.png", 2);
+		// 		"40DnoPCB.PNG", 1);
+		// Product pcb = new Product("Mona v.1.1", "A Mona PCB for mechanical keyboards", 100d, "reference.png", 2);
 		// case40.setClient(clientRepository.findById(2L).get());
 		// pcb.setClient(clientRepository.findById(2L).get());
 
