@@ -30,8 +30,6 @@ public class Client {
   // @Column(name = "password", nullable = false, columnDefinition = "TEXT")
   private String password;
 
-  private boolean isLoggedIn;
-
   @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = CascadeType.ALL)
   private List<Product> products = new ArrayList<>();
 
@@ -63,14 +61,6 @@ public class Client {
     this.password = password;
   }
 
-  public boolean isLoggedIn() {
-    return isLoggedIn;
-  }
-
-  public void setLoggedIn(boolean isLoggedIn) {
-    this.isLoggedIn = isLoggedIn;
-  }
-
   public void addProduct(Product product) {
     if (!this.products.contains(product)) {
       this.products.add(product);
@@ -86,13 +76,6 @@ public class Client {
 
   public List<Product> getProduct() {
     return products;
-  }
-
-  public boolean login(String username, String password) {
-    if (this.username.equals(username) && this.password.equals(password)) {
-      setLoggedIn(true);
-    }
-    return isLoggedIn;
   }
 
   @Override
