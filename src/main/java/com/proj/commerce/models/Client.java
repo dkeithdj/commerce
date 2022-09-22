@@ -24,20 +24,22 @@ public class Client {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // @Column(name = "username", nullable = false, columnDefinition = "TEXT")
   private String username;
 
-  // @Column(name = "password", nullable = false, columnDefinition = "TEXT")
   private String password;
 
-  private boolean isLoggedIn;
+  private double wallet;
 
   @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = CascadeType.ALL)
   private List<Product> products = new ArrayList<>();
 
-  public Client(String username, String password) {
+  @OneToMany(mappedBy = "client", orphanRemoval = true, cascade = CascadeType.ALL)
+  private List<Order> orders = new ArrayList<>();
+
+  public Client(String username, String password, double wallet) {
     this.username = username;
     this.password = password;
+    this.wallet = wallet;
   }
 
   public Client() {
@@ -63,12 +65,12 @@ public class Client {
     this.password = password;
   }
 
-  public boolean isLoggedIn() {
-    return isLoggedIn;
+  public double getWallet() {
+    return wallet;
   }
 
-  public void setLoggedIn(boolean isLoggedIn) {
-    this.isLoggedIn = isLoggedIn;
+  public void setWallet(double wallet) {
+    this.wallet = wallet;
   }
 
   public void addProduct(Product product) {
@@ -86,13 +88,6 @@ public class Client {
 
   public List<Product> getProduct() {
     return products;
-  }
-
-  public boolean login(String username, String password) {
-    if (this.username.equals(username) && this.password.equals(password)) {
-      setLoggedIn(true);
-    }
-    return isLoggedIn;
   }
 
   @Override
