@@ -2,6 +2,7 @@ package com.proj.commerce.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,10 +10,15 @@ import java.nio.file.Path;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.plaf.basic.BasicArrowButton;
 
 public class UI {
   public final Color bg0 = new Color(36, 40, 59);
@@ -75,7 +81,8 @@ public class UI {
     }
 
     public void setHtmlText(String htmlText) {
-      setText(String.format("<html><style>%s</style><body>%s</body></html>", styleSheet(), htmlText));
+      setText(
+          String.format("<html><style>%s</style><body>%s</body></html>", styleSheet(), htmlText));
     }
 
     public CustomLabel(String text) {
@@ -106,6 +113,33 @@ public class UI {
       setBorder(BorderFactory.createLineBorder(bg0, 0));
       setFont(new Font("Tahoma", Font.PLAIN, 14));
     }
+  }
+
+  public class CustomSpinner extends JSpinner {
+    public CustomSpinner(SpinnerNumberModel model) {
+      setModel(model);
+      JComponent spinnerEditor = getEditor();
+      JFormattedTextField spinnerFormat = ((JSpinner.DefaultEditor) spinnerEditor).getTextField();
+      spinnerFormat.setColumns(3);
+      spinnerFormat.setEditable(false);
+      spinnerFormat.setFont(new Font("Tahoma", Font.PLAIN, 15));
+      spinnerFormat.setSize(500, 300);
+      int n = spinnerEditor.getComponentCount();
+      for (int i = 0; i < n; i++) {
+        Component c = spinnerEditor.getComponent(i);
+        if (c instanceof JFormattedTextField) {
+          c.setBackground(new UI().bg1);
+          c.setForeground(new UI().fg1);
+
+        }
+        if (c instanceof JButton) {
+          c.setBackground(new UI().bg1);
+          c.setForeground(new UI().fg1);
+
+        }
+      }
+    }
+
   }
 
 }
