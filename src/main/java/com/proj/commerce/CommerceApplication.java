@@ -54,18 +54,18 @@ public class CommerceApplication extends JFrame {
 		// clientRepository.saveAll(List.of(foo, bar, baz));
 
 		// Product case40 = new Product("40D Case", "A 40D Keyboard case", 100d,
-		// 		"40DnoPCB.PNG", 1);
-		// Product pcb = new Product("Mona v.1.1", "A Mona PCB for mechanical keyboards", 100d, "reference.png", 2);
+		// "40DnoPCB.PNG", 1);
+		// Product pcb = new Product("Mona v.1.1", "A Mona PCB for mechanical
+		// keyboards", 100d, "reference.png", 2);
 		// case40.setClient(clientRepository.findById(2L).get());
 		// pcb.setClient(clientRepository.findById(2L).get());
 
 		// productRepository.save(case40);
 		// productRepository.save(pcb);
 
-		Views view = new Views();
-		view.setProducts(productRepository.findAll());
-		view.setUsers(clientRepository.findAll());
-		view.listings();
+		new Views().listings();
+		// view.setProducts(productRepository.findAll());
+		// view.setUsers(clientRepository.findAll());
 
 	}
 
