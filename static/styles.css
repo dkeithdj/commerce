@@ -13,6 +13,7 @@ body {
   border-radius: 15px; */
 }
 
+
 .title {
   /* font-size: 1.2em; */
   /* margin: 0px 20px 0px 20px; */
@@ -20,12 +21,20 @@ body {
   font-family: 'Tahoma';
 }
 
+.desc-align {
+  text-align: justify;
+  width: 250px;
+  word-wrap: break-word;
+}
+
 .description {
   text-align: justify;
+  /* width: 200px;
+  word-wrap: break-word; */
 }
 
 .value {
-  font-size: 1em;
+  /* font-size: 1em; */
   /* margin: 0px 20px 0px 20px; */
   color: #f7768e;
   font-family: 'Tahoma';
