@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -12,6 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +24,18 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FileUtils;
@@ -40,8 +48,10 @@ import com.proj.commerce.models.Client;
 import com.proj.commerce.repositories.ClientRepository;
 import com.proj.commerce.service.ProductService;
 import com.proj.commerce.ui.UI;
+import com.proj.commerce.ui.UI.CustomButton;
 import com.proj.commerce.ui.UI.CustomLabel;
 
+import ch.qos.logback.core.status.Status;
 import net.miginfocom.swing.MigLayout;
 
 import com.github.rjeschke.txtmark.Processor;
@@ -55,24 +65,24 @@ import com.github.rjeschke.txtmark.Processor;
 public class Views extends JFrame {
 
     // @Autowired
-    private ProductService productService;
-    private ClientRepository clientRepository;
+    private ClientRepository clientRepository = (ClientRepository) UtilBean.getBean(ClientRepository.class);
+    private ProductService productService = (ProductService) UtilBean.getBean(ProductService.class);
     // @Autowired
     // private ApplicationContext context;
 
     // @Autowired
     // private ConfigurableApplicationContext applicationContext;
 
-    private List<Product> products;
+    private List<Product> products = productService.fetchProductList();
     private List<Client> users;
     private Client loggedInClient;
-    private boolean isLoggedIn = false;
 
     private JPanel navPnl;
 
     private JLabel title;
     private JButton account;
     private JButton sell;
+    private JButton orders;
     private JButton loginButton;
     private JButton registerButton;
     private JButton logoutButton;
@@ -97,7 +107,7 @@ public class Views extends JFrame {
     private JPanel mainPnl = new JPanel(new BorderLayout());
     private PrettyTime relativeTime = new PrettyTime();
 
-    public JPanel card(List<Product> products) {
+    public JPanel card() {
         // grouped product panel
         MigLayout layout = new MigLayout(String.format(" wrap %d, alignx center", wrapSize));
 
@@ -113,13 +123,10 @@ public class Views extends JFrame {
             JPanel cardPnl = new JPanel(
                     new MigLayout(" fill,  insets panel, wrap, alignx center", "", "[50%][50%]"));
             try {
-                // String keyb = "EventHorizonTemp.png";
-                // String keyb = "kekw.png";
-                String keyb = "40D1080Side.png";
-                // String keyb = user.getProduct().get(0).getImage();
                 BufferedImage thumbnail = ImageIO.read(new File(product.getImage()));
                 Dimension maxSize = new Dimension(180, 180);
-                BufferedImage resizedThumbnail = Scalr.resize(thumbnail, Method.QUALITY, maxSize.width, maxSize.height);
+                BufferedImage resizedThumbnail = Scalr.resize(thumbnail, Method.BALANCED, maxSize.width,
+                        maxSize.height);
                 ImageIcon ss = new ImageIcon(resizedThumbnail);
                 itemImage.setIcon(ss);
                 itemImage.setMaximumSize(new Dimension(180, 180));
@@ -129,12 +136,13 @@ public class Views extends JFrame {
             MouseAdapter mm = new MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
-                    bodyPnl.removeAll();
-                    bodyPnl.add(product(product));
-                    mainPnl.revalidate();
-                    mainPnl.repaint();
+                    if (loggedInClient != null) {
+                        redirect(product(product));
+                    } else {
+                        redirect(loginForm());
+                    }
+
                     // pnl.setVisible(false);
-                    // TODO get id of current card to be redirected to listing.id
 
                 }
 
@@ -164,8 +172,8 @@ public class Views extends JFrame {
             cardPnl.addMouseListener(mm);
 
             cardPnl.setBackground(null);
-            cardPnl.setMaximumSize(new Dimension(200, 300));
-            cardPnl.setPreferredSize(new Dimension(200, 300));
+            cardPnl.setMaximumSize(new Dimension(200, 350));
+            cardPnl.setPreferredSize(new Dimension(200, 350));
             cardPnl.setBorder(BorderFactory.createLineBorder(new Color(0, 70, 135), 1));
             cardPnl.setBackground(new UI().bg1);
             cardList.add(cardPnl);
@@ -187,7 +195,6 @@ public class Views extends JFrame {
         cardList.forEach(card -> {
             productsPnl.add(card);
         });
-        // productsPnl.setBackground(new Color(36, 40, 59));
 
         return productsPnl;
     }
@@ -201,10 +208,8 @@ public class Views extends JFrame {
         title.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                bodyPnl.removeAll();
-                bodyPnl.add(card(products));
-                mainPnl.revalidate();
-                mainPnl.repaint();
+                products = productService.fetchProductList();
+                redirect(card());
             }
 
             @Override
@@ -224,15 +229,7 @@ public class Views extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                bodyPnl.removeAll();
-                // productService = (ProductService) context.getBean("productService");
-                productService = (ProductService) UtilBean.getBean(ProductService.class);
-
-                bodyPnl.add(card(productService.fetchProductListByClient(loggedInClient.getId())));
-                // bodyPnl.add(card());
-                mainPnl.revalidate();
-                mainPnl.repaint();
-
+                redirect(account());
             }
 
         });
@@ -244,8 +241,22 @@ public class Views extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                redirect(productForm());
+            }
+
+        });
+
+        orders = new UI().new CustomButton("My Orders");
+        orders.setBackground(new UI().purple0);
+
+        orders.addActionListener(new ActionListener() {
+
+            // TODO order function
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // redirect(productForm());
                 bodyPnl.removeAll();
-                bodyPnl.add(newProductForm());
+                // bodyPnl.add(newProductForm());
                 mainPnl.revalidate();
                 mainPnl.repaint();
                 // listingPnl.setComponentZOrder(loginForm(), 5);
@@ -261,11 +272,7 @@ public class Views extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                bodyPnl.removeAll();
-                bodyPnl.add(loginForm());
-                mainPnl.revalidate();
-                mainPnl.repaint();
-                // listingPnl.setComponentZOrder(loginForm(), 5);
+                redirect(loginForm());
 
             }
 
@@ -283,10 +290,8 @@ public class Views extends JFrame {
                 navPnl.add(loginButton, "push, al right");
                 navPnl.add(registerButton);
 
-                bodyPnl.removeAll();
-                bodyPnl.add(card(products));
-                mainPnl.revalidate();
-                mainPnl.repaint();
+                products = productService.fetchProductList();
+                redirect(card());
             }
 
         });
@@ -297,26 +302,19 @@ public class Views extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                bodyPnl.removeAll();
-                bodyPnl.add(registerForm());
-                mainPnl.revalidate();
-                mainPnl.repaint();
+                redirect(registerForm());
             }
 
         });
 
         navPnl.add(title);
-        // pnl.add(account);
-        // pnl.add(sell);
 
         navPnl.add(loginButton, "push,al right");
         navPnl.add(registerButton);
-        // pnl.add(logoutButton, "push,al right");
         return navPnl;
 
     }
 
-    // TODO add login validation
     public JPanel loginForm() {
         JPanel pnl = new UI().new CustomPanel();
         pnl.setLayout(new MigLayout("align center"));
@@ -326,6 +324,8 @@ public class Views extends JFrame {
 
         JLabel password = new UI().new CustomLabel("Password: ");
         JPasswordField passwordIn = new UI().new CustomPasswordField(15);
+
+        JLabel status = new UI().new CustomLabel("");
 
         JButton login = new UI().new CustomButton("Login");
         login.setBackground(new UI().green0);
@@ -343,12 +343,15 @@ public class Views extends JFrame {
                     navPnl.add(title);
                     navPnl.add(account);
                     navPnl.add(sell);
+                    navPnl.add(orders);
                     navPnl.add(logoutButton, "push, al right");
+
+                    products = productService.fetchProductList();
+                    redirect(card());
+                } else {
+                    status.setText("Username or password is incorrect");
+                    login.setBackground(new UI().red);
                 }
-                bodyPnl.removeAll();
-                bodyPnl.add(card(products));
-                mainPnl.revalidate();
-                mainPnl.repaint();
 
             }
 
@@ -358,7 +361,8 @@ public class Views extends JFrame {
         pnl.add(usernameIn, "wrap");
         pnl.add(password);
         pnl.add(passwordIn, "wrap");
-        pnl.add(login, "skip, al right");
+        pnl.add(login, "wrap, skip, al right");
+        pnl.add(status, " span, al center");
 
         return pnl;
     }
@@ -373,8 +377,10 @@ public class Views extends JFrame {
         JLabel password = new UI().new CustomLabel("Password: ");
         JPasswordField passwordIn = new UI().new CustomPasswordField(15);
 
-        JLabel reEnterPassword = new UI().new CustomLabel("Re-enter Password: ");
-        JPasswordField reEnterPasswordIn = new UI().new CustomPasswordField(15);
+        JLabel confirmPassword = new UI().new CustomLabel("Confirm Password: ");
+        JPasswordField confirmPasswordIn = new UI().new CustomPasswordField(15);
+
+        JLabel status = new UI().new CustomLabel("");
 
         JButton registerButton = new UI().new CustomButton("Register");
         registerButton.setBackground(new UI().orange0);
@@ -383,24 +389,31 @@ public class Views extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                if (String.valueOf(passwordIn.getPassword()).equals(String.valueOf(confirmPasswordIn.getPassword()))) {
+                    Client client = new Client(usernameIn.getText(), String.valueOf(passwordIn.getPassword()), 0);
+                    clientRepository.save(client);
+                    redirect(loginForm());
+                } else {
+                    status.setText("Password doesn't match, try again.");
+                }
             }
-
         });
 
         pnl.add(username);
         pnl.add(usernameIn, "wrap");
         pnl.add(password);
         pnl.add(passwordIn, "wrap");
-        pnl.add(reEnterPassword);
-        pnl.add(reEnterPasswordIn, "wrap");
-        pnl.add(registerButton, "skip, al right");
+        pnl.add(confirmPassword);
+        pnl.add(confirmPasswordIn, "wrap");
+        pnl.add(registerButton, "wrap, skip, al right");
+        pnl.add(status, "span, al center");
 
         return pnl;
     }
 
     public JPanel product(Product product) {
         JPanel productPnl = new UI().new CustomPanel();
-        productPnl.setLayout(new MigLayout("wrap,align center", "[][]", "[][]"));
+        productPnl.setLayout(new MigLayout(" wrap, align center", "[][]", "[][]"));
         JLabel itemImage = new JLabel();
         try {
 
@@ -414,21 +427,54 @@ public class Views extends JFrame {
             e.printStackTrace();
         }
         CustomLabel description = new UI().new CustomLabel();
-        description.setHtmlText(String.format("<h1 class='title'>%s</h1><p class='description'>%s</p><br>",
-                product.getTitle(), product.getDescription()));
+        description.setHtmlText(
+                String.format(
+                        "<h1 class='title'>%s</h1><div class='desc-align'><p class='description'>%s</p></div><br>",
+                        product.getTitle(), product.getDescription()));
+
         CustomLabel price = new UI().new CustomLabel();
+        price.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new UI().bg1));
         price.setHtmlText(String.format(
-                "<p class='value'>$%.2f</p><p class='value'>Stocks: %d</p><p class='description'>Opened on %s</p>",
-                product.getPrice(),
-                product.getStocks(), product.getDate().format(DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm"))));
+                "<h2 class='value'>$%.2f</h2><h3>Seller: <b>%s</b></h3>",
+                product.getPrice(), loggedInClient.getUsername()));
+
+        CustomLabel available = new UI().new CustomLabel();
+        available.setHtmlText(String.format("<p class='value'><b>%d</b> Available</p>", product.getStocks()));
+
+        CustomLabel info = new UI().new CustomLabel();
+        info.setHtmlText(String.format("<p class='description'>Opened on %s</p>",
+                product.getDate().format(DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm"))));
+        info.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new UI().bg1));
+
+        JSpinner quantity = new UI().new CustomSpinner(new SpinnerNumberModel(1, 1, product.getStocks(), 1));
+        JButton buy = new UI().new CustomButton("Buy");
+        buy.setBackground(new UI().green1);
+        quantity.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                // if (Integer.parseInt(quantity.getValue().toString()) == 0) {
+
+                // buy.setEnabled(false);
+                // } else {
+                // buy.setEnabled(true);
+                // }
+            }
+
+        });
+
+        // TODO design order
         productPnl.add(itemImage);
         productPnl.add(description, "aligny top,span 1 2");
-        productPnl.add(price, " skip 2");
+        productPnl.add(price, "growx,skip 2");
+        productPnl.add(available, "skip, split 3,al right");
+        productPnl.add(quantity);
+        productPnl.add(buy, "wrap, al right");
+        productPnl.add(info, "skip, growx");
         return productPnl;
     }
 
-    public JPanel newProductForm() {
-        // user.getProduct().get(0);
+    public JPanel productForm() {
         JPanel productForm = new UI().new CustomPanel();
         productForm.setLayout(new MigLayout("wrap, alignx center", "[][]"));
         JLabel title = new UI().new CustomLabel("Title: ");
@@ -469,9 +515,7 @@ public class Views extends JFrame {
                     status.setText("None");
                     file = null;
                 }
-
             }
-
         });
 
         sell.addActionListener(new ActionListener() {
@@ -492,20 +536,32 @@ public class Views extends JFrame {
                         }
                     }
                     if (c == 0) {
+                        FileUtils.forceMkdir(destination);
+                        BufferedImage thumbnail = ImageIO.read(file);
+                        Dimension maxSize = new Dimension(500, 500);
+                        BufferedImage resizedThumbnail = Scalr.resize(thumbnail, Method.QUALITY, maxSize.width,
+                                maxSize.height);
+
                         String newImagePath = new File(destination, file.getName()).toString();
-                        FileUtils.copyFileToDirectory(file, destination);
-                        Double.parseDouble(priceIn.getText());
-                        // productService
-                        // .saveProduct(new Product(titleIn.getText(), MDtoHTML,
-                        // Double.parseDouble(priceIn.getText()),
-                        // destination.getAbsolutePath() + file.getName(),
-                        // Integer.parseInt(stockIn.getText())));
+                        ImageIO.write(resizedThumbnail, "png", new File(destination, file.getName().toString()));
+
+                        Product newProduct = new Product(titleIn.getText(), MDtoHTML,
+                                Double.parseDouble(priceIn.getText()),
+                                newImagePath,
+                                Integer.parseInt(stockIn.getText()));
+
+                        newProduct.setClient(loggedInClient);
+
+                        productService.saveProduct(newProduct);
+
+                        products = productService.fetchProductList();
+                        redirect(card());
                     }
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 } catch (NullPointerException n1) {
                     imageButton.setBackground(new UI().red);
-                    // n1.printStackTrace();
+                    n1.printStackTrace();
                 } catch (NumberFormatException num1) {
                     price.setForeground(new UI().red);
                     stock.setForeground(new UI().red);
@@ -532,12 +588,34 @@ public class Views extends JFrame {
         return productForm;
     }
 
+    public JPanel account() {
+        products = productService.fetchProductListByClient(loggedInClient.getId());
+        JPanel accountPnl = new UI().new CustomPanel();
+        accountPnl.setLayout(new BorderLayout());
+        JPanel accountNavPnl = new UI().new CustomPanel();
+        accountNavPnl.setBackground(new Color(52, 54, 78));
+        accountNavPnl.setLayout(new MigLayout("", "[][]"));
+        JLabel totalListings = new UI().new CustomLabel("Total listings: " + products.size());
+        JLabel walletAmount = new UI().new CustomLabel("Wallet: " + loggedInClient.getWallet());
+        JButton addAmount = new UI().new CustomButton("+");
+        addAmount.setBackground(new UI().green0);
+
+        accountNavPnl.add(totalListings);
+        accountNavPnl.add(walletAmount, "push, al right");
+        accountNavPnl.add(addAmount);
+
+        accountPnl.add(accountNavPnl, BorderLayout.NORTH);
+        accountPnl.add(card(), BorderLayout.CENTER);
+        return accountPnl;
+
+    }
+
     public void listings() {
         bodyPnl = new UI().new CustomPanel();
         bodyPnl.setLayout(new BorderLayout());
 
         mainPnl.add(nav(), BorderLayout.NORTH);
-        bodyPnl.add(card(products), BorderLayout.CENTER);
+        bodyPnl.add(card(), BorderLayout.CENTER);
 
         mainPnl.add(bodyPnl, BorderLayout.CENTER);
 
@@ -550,6 +628,13 @@ public class Views extends JFrame {
         setMinimumSize(new Dimension(880, 400));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public void redirect(JPanel panel) {
+        bodyPnl.removeAll();
+        bodyPnl.add(panel);
+        mainPnl.revalidate();
+        mainPnl.repaint();
     }
 
 }
