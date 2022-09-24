@@ -34,7 +34,7 @@ public class Product {
   private double price;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "client_id")
   private Client client;
 
   private String image;
