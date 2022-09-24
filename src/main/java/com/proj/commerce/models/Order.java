@@ -19,14 +19,14 @@ import javax.persistence.Table;
 import org.springframework.lang.Nullable;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 public class Order {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "client_id")
   private Client client;
 
   @ManyToMany
