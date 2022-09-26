@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,10 +30,12 @@ public class Order {
   @JoinColumn(name = "client_id")
   private Client client;
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @Nullable
   @JoinTable(name = "order_product", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
   private List<Product> products = new ArrayList<>();
+
+  private int quantity;
 
   private LocalDateTime orderTime;
 
@@ -41,6 +44,7 @@ public class Order {
   }
 
   public Order(Client client) {
+    this.client = client;
     this.orderTime = LocalDateTime.now();
   }
 
@@ -64,7 +68,21 @@ public class Order {
     this.products = products;
   }
 
+  public int getQuantity() {
+    return quantity;
+  }
+
+  public void setQuantity(int quantity) {
+    this.quantity = quantity;
+  }
+
   public LocalDateTime getOrderTime() {
     return orderTime;
+  }
+
+  public String toString() {
+    return String.format("id: %d\ntime: %s\nClient ID: %d\nQuantity: %d\nProducts: %s", id, orderTime.toString(),
+        client.getId(), quantity,
+        products);
   }
 }

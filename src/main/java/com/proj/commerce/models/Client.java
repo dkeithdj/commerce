@@ -90,6 +90,14 @@ public class Client {
     return products;
   }
 
+  public List<Order> getOrders() {
+    return orders;
+  }
+
+  public void addOrder(Order order) {
+    this.orders.add(order);
+  }
+
   @Override
   public String toString() {
     return String.format("id: %d\nusername: %s\npassword: %s", id, username, password);
