@@ -1,5 +1,6 @@
 package com.proj.commerce;
 
+import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -63,7 +64,8 @@ public class CommerceApplication extends JFrame {
 		// productRepository.save(case40);
 		// productRepository.save(pcb);
 
-		new Views().listings();
+		new Views();
+
 		// view.setProducts(productRepository.findAll());
 		// view.setUsers(clientRepository.findAll());
 
