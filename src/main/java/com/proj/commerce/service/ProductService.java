@@ -11,6 +11,8 @@ public interface ProductService {
 
   List<Product> fetchProductListByClient(Long clientId);
 
+  List<Product> fetchProductListByStocks();
+
   Product updateProduct(Product product, Long productId);
 
   void deleteProductById(Long productId);

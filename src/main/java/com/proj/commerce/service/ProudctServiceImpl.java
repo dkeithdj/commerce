@@ -52,4 +52,9 @@ public class ProudctServiceImpl implements ProductService {
     return productRepository.findByClientId(userId);
   }
 
+  @Override
+  public List<Product> fetchProductListByStocks() {
+    return productRepository.findByStocksGreaterThan(0);
+  }
+
 }
