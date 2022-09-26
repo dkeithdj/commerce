@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -43,7 +44,7 @@ public class Product {
 
   private int stocks;
 
-  @ManyToMany(mappedBy = "products")
+  @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
   @Nullable
   private List<Order> orders = new ArrayList<>();
 
@@ -121,6 +122,12 @@ public class Product {
 
   public void setOrders(List<Order> orders) {
     this.orders = orders;
+  }
+
+  @Override
+  public String toString() {
+    // TODO Auto-generated method stub
+    return String.format("ID: %d\nTitle: %s\nSeller: %s", id, title, client.getUsername());
   }
 
 }
