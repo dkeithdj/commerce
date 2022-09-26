@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -45,7 +46,11 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import com.proj.commerce.models.Product;
 import com.proj.commerce.models.Client;
+import com.proj.commerce.models.Order;
 import com.proj.commerce.repositories.ClientRepository;
+import com.proj.commerce.repositories.OrderRepository;
+import com.proj.commerce.repositories.ProductRepository;
+import com.proj.commerce.service.OrderService;
 import com.proj.commerce.service.ProductService;
 import com.proj.commerce.ui.UI;
 import com.proj.commerce.ui.UI.CustomButton;
@@ -62,20 +67,19 @@ import com.github.rjeschke.txtmark.Processor;
  * Hello world!
  *
  */
-public class Views extends JFrame {
+public class Views extends UI {
 
-    // @Autowired
     private ClientRepository clientRepository = (ClientRepository) UtilBean.getBean(ClientRepository.class);
+    private OrderRepository orderRepository = (OrderRepository) UtilBean.getBean(OrderRepository.class);
     private ProductService productService = (ProductService) UtilBean.getBean(ProductService.class);
-    // @Autowired
-    // private ApplicationContext context;
+    private OrderService orderService = (OrderService) UtilBean.getBean(OrderService.class);
 
-    // @Autowired
-    // private ConfigurableApplicationContext applicationContext;
-
-    private List<Product> products = productService.fetchProductList();
+    private List<Product> products = productService.fetchProductListByStocks();
     private List<Client> users;
     private Client loggedInClient;
+    private List<Order> clientOrders;
+
+    private JFrame f = new JFrame();
 
     private JPanel navPnl;
 
@@ -87,16 +91,6 @@ public class Views extends JFrame {
     private JButton registerButton;
     private JButton logoutButton;
 
-    // Card assembly per products
-
-    public void setUsers(List<Client> users) {
-        this.users = users;
-    }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
-
     private JPanel bodyPnl;
     private File file = null;
 
@@ -107,11 +101,31 @@ public class Views extends JFrame {
     private JPanel mainPnl = new JPanel(new BorderLayout());
     private PrettyTime relativeTime = new PrettyTime();
 
+    public Views() {
+        bodyPnl = new CustomPanel();
+        bodyPnl.setLayout(new BorderLayout());
+
+        mainPnl.add(nav(), BorderLayout.NORTH);
+        bodyPnl.add(card(), BorderLayout.CENTER);
+
+        mainPnl.add(bodyPnl, BorderLayout.CENTER);
+
+        JScrollPane scroll = new JScrollPane(mainPnl);
+
+        f.add(scroll);
+        f.pack();
+        f.setVisible(true);
+        f.setSize(1000, 600);
+        f.setMinimumSize(new Dimension(880, 400));
+        f.setLocationRelativeTo(null);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
     public JPanel card() {
         // grouped product panel
         MigLayout layout = new MigLayout(String.format(" wrap %d, alignx center", wrapSize));
 
-        JPanel productsPnl = new UI().new CustomPanel();
+        JPanel productsPnl = new CustomPanel();
         productsPnl.setLayout(layout);
 
         // per product panel
@@ -141,26 +155,21 @@ public class Views extends JFrame {
                     } else {
                         redirect(loginForm());
                     }
-
-                    // pnl.setVisible(false);
-
                 }
 
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
-                    cardPnl.setBorder(BorderFactory.createLineBorder(new UI().purple0, 3));
-                    // System.out.println(pnl.getWidth() + "\t" + pnl.getHeight());
-
+                    cardPnl.setBorder(BorderFactory.createLineBorder(PURPLE0, 3));
                 }
 
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
-                    cardPnl.setBorder(BorderFactory.createLineBorder(new UI().bg1, 1));
+                    cardPnl.setBorder(BorderFactory.createLineBorder(BG1, 1));
                 }
 
             };
 
-            CustomLabel itemDesc = new UI().new CustomLabel();
+            CustomLabel itemDesc = new CustomLabel();
             itemDesc.setHtmlText(String.format(
                     "<div class='container'><hr><h2 class='title'>%s</h2><p class='value'>%.2f USD</p><br><p class='seller'>%s</p><hr><div class='divide'><p class='date'>%s</p></div></div>",
                     product.getTitle(), product.getPrice(), product.getClient().getUsername(),
@@ -175,11 +184,11 @@ public class Views extends JFrame {
             cardPnl.setMaximumSize(new Dimension(200, 350));
             cardPnl.setPreferredSize(new Dimension(200, 350));
             cardPnl.setBorder(BorderFactory.createLineBorder(new Color(0, 70, 135), 1));
-            cardPnl.setBackground(new UI().bg1);
+            cardPnl.setBackground(BG1);
             cardList.add(cardPnl);
 
         });
-        addComponentListener(new ComponentAdapter() {
+        f.addComponentListener(new ComponentAdapter() {
 
             public void componentResized(ComponentEvent e) {
                 Component c = (Component) e.getSource();
@@ -200,31 +209,31 @@ public class Views extends JFrame {
     }
 
     public JPanel nav() {
-        navPnl = new UI().new CustomPanel();
+        navPnl = new CustomPanel();
         navPnl.setLayout(new MigLayout("", "[][][]"));
-        navPnl.setBackground(new UI().bg2);
+        navPnl.setBackground(BG2);
 
-        title = new UI().new CustomLabel("<html><font size=14>Commerce</html>");
+        title = new CustomLabel("<html><font size=14>Commerce</html>");
         title.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                products = productService.fetchProductList();
+                products = productService.fetchProductListByStocks();
                 redirect(card());
             }
 
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
-                title.setForeground(new UI().fg0);
+                title.setForeground(FG0);
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
-                title.setForeground(new UI().fg1);
+                title.setForeground(FG1);
             }
 
         });
-        account = new UI().new CustomButton();
-        account.setBackground(new UI().blue0);
+        account = new CustomButton();
+        account.setBackground(BLUE0);
         account.addActionListener(new ActionListener() {
 
             @Override
@@ -234,8 +243,8 @@ public class Views extends JFrame {
 
         });
 
-        sell = new UI().new CustomButton("Sell");
-        sell.setBackground(new UI().blue1);
+        sell = new CustomButton("Sell");
+        sell.setBackground(BLUE1);
 
         sell.addActionListener(new ActionListener() {
 
@@ -246,27 +255,31 @@ public class Views extends JFrame {
 
         });
 
-        orders = new UI().new CustomButton("My Orders");
-        orders.setBackground(new UI().purple0);
+        orders = new CustomButton("My Orders");
+        orders.setBackground(PURPLE0);
 
         orders.addActionListener(new ActionListener() {
 
-            // TODO order function
             @Override
             public void actionPerformed(ActionEvent e) {
-                // redirect(productForm());
-                bodyPnl.removeAll();
-                // bodyPnl.add(newProductForm());
-                mainPnl.revalidate();
-                mainPnl.repaint();
-                // listingPnl.setComponentZOrder(loginForm(), 5);
+                // List<Product> productOrders = new ArrayList<>();
+                // clientOrders.forEach(order -> {
+                // order.getProducts().forEach(product -> productOrders.add(product));
+                // });
+                // clientOrders.forEach(order -> {
+                // productOrders.add(order.getProducts());
+                // });
+                myOrder = true;
+                products = orderService.fetchProductsByClientId(loggedInClient.getId());
+                redirect(card());
+                // productOrders.clear();
 
             }
 
         });
 
-        loginButton = new UI().new CustomButton("Login");
-        loginButton.setBackground(new UI().green0);
+        loginButton = new CustomButton("Login");
+        loginButton.setBackground(GREEN0);
 
         loginButton.addActionListener(new ActionListener() {
 
@@ -277,8 +290,8 @@ public class Views extends JFrame {
             }
 
         });
-        logoutButton = new UI().new CustomButton("Logout");
-        logoutButton.setBackground(new UI().red);
+        logoutButton = new CustomButton("Logout");
+        logoutButton.setBackground(RED);
 
         logoutButton.addActionListener(new ActionListener() {
 
@@ -296,16 +309,17 @@ public class Views extends JFrame {
 
         });
 
-        registerButton = new UI().new CustomButton("Register");
-        registerButton.setBackground(new UI().orange0);
-        registerButton.addActionListener(new ActionListener() {
+        registerButton = new CustomButton("Register");
+        registerButton.setBackground(ORANGE0);
+        registerButton.addActionListener(new UI().redirectListener(mainPnl, bodyPnl, registerForm()));
+        // registerButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                redirect(registerForm());
-            }
+        // @Override
+        // public void actionPerformed(ActionEvent e) {
+        // redirect(registerForm());
+        // }
 
-        });
+        // });
 
         navPnl.add(title);
 
@@ -316,41 +330,48 @@ public class Views extends JFrame {
     }
 
     public JPanel loginForm() {
-        JPanel pnl = new UI().new CustomPanel();
+        JPanel pnl = new CustomPanel();
         pnl.setLayout(new MigLayout("align center"));
 
-        JLabel username = new UI().new CustomLabel("Username: ");
-        JTextField usernameIn = new UI().new CustomTextField(15);
+        JLabel username = new CustomLabel("Username: ");
+        JTextField usernameIn = new CustomTextField(15);
 
-        JLabel password = new UI().new CustomLabel("Password: ");
-        JPasswordField passwordIn = new UI().new CustomPasswordField(15);
+        JLabel password = new CustomLabel("Password: ");
+        JPasswordField passwordIn = new CustomPasswordField(15);
 
-        JLabel status = new UI().new CustomLabel("");
+        JLabel status = new CustomLabel("");
 
-        JButton login = new UI().new CustomButton("Login");
-        login.setBackground(new UI().green0);
+        JButton login = new CustomButton("Login");
+        login.setBackground(GREEN0);
         login.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 clientRepository = (ClientRepository) UtilBean.getBean(ClientRepository.class);
-                loggedInClient = clientRepository.findByUsernameAndPassword(usernameIn.getText(),
-                        String.valueOf(passwordIn.getPassword()));
-                if (loggedInClient != null) {
-                    navPnl.removeAll();
+                if (!usernameIn.getText().isBlank() && !(passwordIn.getPassword().length == 0)) {
+                    loggedInClient = clientRepository.findByUsernameAndPassword(usernameIn.getText(),
+                            String.valueOf(passwordIn.getPassword()));
+                    if (loggedInClient != null) {
+                        clientOrders = orderRepository.findByClientId(loggedInClient.getId());
+                        navPnl.removeAll();
 
-                    account.setText(loggedInClient.getUsername());
-                    navPnl.add(title);
-                    navPnl.add(account);
-                    navPnl.add(sell);
-                    navPnl.add(orders);
-                    navPnl.add(logoutButton, "push, al right");
+                        account.setText(loggedInClient.getUsername());
+                        navPnl.add(title);
+                        navPnl.add(account);
+                        navPnl.add(sell);
+                        navPnl.add(orders);
+                        navPnl.add(logoutButton, "push, al right");
 
-                    products = productService.fetchProductList();
-                    redirect(card());
+                        products = productService.fetchProductList();
+                        redirect(card());
+                    } else {
+                        status.setText("Username or password is incorrect");
+                        login.setBackground(RED);
+                    }
                 } else {
-                    status.setText("Username or password is incorrect");
-                    login.setBackground(new UI().red);
+                    status.setText("Input fields are empty.");
+                    login.setBackground(RED);
+
                 }
 
             }
@@ -368,22 +389,22 @@ public class Views extends JFrame {
     }
 
     public JPanel registerForm() {
-        JPanel pnl = new UI().new CustomPanel();
+        JPanel pnl = new CustomPanel();
         pnl.setLayout(new MigLayout("align center"));
 
-        JLabel username = new UI().new CustomLabel("Username: ");
-        JTextField usernameIn = new UI().new CustomTextField(15);
+        JLabel username = new CustomLabel("Username: ");
+        JTextField usernameIn = new CustomTextField(15);
 
-        JLabel password = new UI().new CustomLabel("Password: ");
-        JPasswordField passwordIn = new UI().new CustomPasswordField(15);
+        JLabel password = new CustomLabel("Password: ");
+        JPasswordField passwordIn = new CustomPasswordField(15);
 
-        JLabel confirmPassword = new UI().new CustomLabel("Confirm Password: ");
-        JPasswordField confirmPasswordIn = new UI().new CustomPasswordField(15);
+        JLabel confirmPassword = new CustomLabel("Confirm Password: ");
+        JPasswordField confirmPasswordIn = new CustomPasswordField(15);
 
-        JLabel status = new UI().new CustomLabel("");
+        JLabel status = new CustomLabel("");
 
-        JButton registerButton = new UI().new CustomButton("Register");
-        registerButton.setBackground(new UI().orange0);
+        JButton registerButton = new CustomButton("Register");
+        registerButton.setBackground(ORANGE0);
         registerButton.addActionListener(new ActionListener() {
 
             @Override
@@ -411,84 +432,131 @@ public class Views extends JFrame {
         return pnl;
     }
 
-    public JPanel product(Product product) {
-        JPanel productPnl = new UI().new CustomPanel();
-        productPnl.setLayout(new MigLayout(" wrap, align center", "[][]", "[][]"));
-        JLabel itemImage = new JLabel();
-        try {
+    boolean myOrder = false;
+    JSpinner quantity = new JSpinner();
 
-            BufferedImage thumbnail = ImageIO.read(new File(product.getImage()));
-            Dimension maxSize = new Dimension(500, 500);
-            BufferedImage resizedThumbnail = Scalr.resize(thumbnail, Method.QUALITY, maxSize.width, maxSize.height);
-            ImageIcon ss = new ImageIcon(resizedThumbnail);
-            itemImage.setIcon(ss);
-            itemImage.setMaximumSize(maxSize);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        CustomLabel description = new UI().new CustomLabel();
+    public JPanel product(Product product) {
+        JPanel productPnl = new CustomPanel();
+        productPnl.setLayout(new MigLayout(" wrap, align center", "[][]", "[][]"));
+        JLabel itemImage = new JLabel(new ImageIcon(product.getImage()));
+        itemImage.setMaximumSize(new Dimension(500, 500));
+
+        CustomLabel description = new CustomLabel();
         description.setHtmlText(
                 String.format(
                         "<h1 class='title'>%s</h1><div class='desc-align'><p class='description'>%s</p></div><br>",
                         product.getTitle(), product.getDescription()));
 
-        CustomLabel price = new UI().new CustomLabel();
-        price.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new UI().bg1));
+        CustomLabel price = new CustomLabel();
+        price.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BG1));
         price.setHtmlText(String.format(
                 "<h2 class='value'>$%.2f</h2><h3>Seller: <b>%s</b></h3>",
-                product.getPrice(), loggedInClient.getUsername()));
+                product.getPrice(), product.getClient().getUsername()));
 
-        CustomLabel available = new UI().new CustomLabel();
+        CustomLabel available = new CustomLabel();
         available.setHtmlText(String.format("<p class='value'><b>%d</b> Available</p>", product.getStocks()));
 
-        CustomLabel info = new UI().new CustomLabel();
+        CustomLabel info = new CustomLabel();
         info.setHtmlText(String.format("<p class='description'>Opened on %s</p>",
                 product.getDate().format(DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm"))));
-        info.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new UI().bg1));
+        info.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BG1));
 
-        JSpinner quantity = new UI().new CustomSpinner(new SpinnerNumberModel(1, 1, product.getStocks(), 1));
-        JButton buy = new UI().new CustomButton("Buy");
-        buy.setBackground(new UI().green1);
-        quantity.addChangeListener(new ChangeListener() {
+        try {
+            quantity = new CustomSpinner(new SpinnerNumberModel(1, 1, product.getStocks(), 1));
+        } catch (Exception e) {
+        }
+        JButton buy = new CustomButton("Buy");
+        buy.setBackground(GREEN1);
+
+        buy.addActionListener(new ActionListener() {
 
             @Override
-            public void stateChanged(ChangeEvent e) {
-                // if (Integer.parseInt(quantity.getValue().toString()) == 0) {
+            public void actionPerformed(ActionEvent e) {
+                if (loggedInClient.getWallet() >= product.getPrice()) {
+                    int orderQuantity = (Integer) quantity.getValue();
+                    // int quantity = Integer.parseInt(quantity.getValue().toString());
+                    Order order = new Order(loggedInClient);
+                    Product updateStock = product;
+                    Client updateClient = loggedInClient;
+                    Client updateSeller = clientRepository.findById(product.getClient().getId()).get();
 
-                // buy.setEnabled(false);
-                // } else {
-                // buy.setEnabled(true);
-                // }
+                    order.setProducts(List.of(product));
+                    order.setQuantity(orderQuantity);
+
+                    updateStock.setStocks(product.getStocks() - orderQuantity);
+                    updateClient.setWallet(loggedInClient.getWallet() - (product.getPrice() * orderQuantity));
+                    updateSeller.setWallet(updateSeller.getWallet() + (product.getPrice() * orderQuantity));
+                    System.out.println("done");
+
+                    productService.updateProduct(updateStock, product.getId());
+                    orderRepository.save(order);
+                    clientRepository.saveAll(List.of(updateClient, updateSeller));
+                    System.out.println("saved");
+                    products = productService.fetchProductListByStocks();
+                    // products = orderService.fetchProductsByClientId(loggedInClient.getId());
+                    // TODO add joption confirm
+                    redirect(card());
+                } else {
+                    System.out.println("Insufficient funds");
+                    // TODO put insufficient funds
+                }
+
             }
 
         });
+
+        JButton edit = new CustomButton("Edit");
+        edit.setBackground(BLUE0);
+        JButton delete = new CustomButton("Delete");
+        delete.setBackground(RED);
 
         // TODO design order
         productPnl.add(itemImage);
         productPnl.add(description, "aligny top,span 1 2");
         productPnl.add(price, "growx,skip 2");
         productPnl.add(available, "skip, split 3,al right");
-        productPnl.add(quantity);
-        productPnl.add(buy, "wrap, al right");
+
+        if (loggedInClient.getId() == product.getClient().getId()) {
+            productPnl.add(edit);
+            productPnl.add(delete);
+            // TODO edit, delete button
+
+        } else if (myOrder) {
+            // } else if (orderRepository.findByClientId(loggedInClient.getId())) {
+            Order currentOrder = orderRepository.findByClientIdAndProductsId(loggedInClient.getId(), product.getId());
+            if (currentOrder != null) {
+
+                available.setHtmlText(
+                        String.format("Ordered <b>%d</b> items on <b>%s</b>", currentOrder.getQuantity(),
+                                currentOrder.getOrderTime().format(DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm"))));
+                myOrder = false;
+            }
+            myOrder = false;
+        } else {
+            productPnl.add(quantity);
+            productPnl.add(buy, "wrap, al right");
+
+        }
+
         productPnl.add(info, "skip, growx");
         return productPnl;
     }
 
     public JPanel productForm() {
-        JPanel productForm = new UI().new CustomPanel();
+        JPanel productForm = new CustomPanel();
         productForm.setLayout(new MigLayout("wrap, alignx center", "[][]"));
-        JLabel title = new UI().new CustomLabel("Title: ");
-        JTextField titleIn = new UI().new CustomTextField(20);
-        JLabel description = new UI().new CustomLabel("Description: ");
+        JLabel title = new CustomLabel("Title: ");
+        JTextField titleIn = new CustomTextField(20);
+        JLabel description = new CustomLabel("Description: ");
         JTextArea descriptionIn = new JTextArea(10, 25);
         descriptionIn.setLineWrap(true);
-        JLabel descriptionNote = new UI().new CustomLabel("(Supports Markdown Syntax)");
-        JLabel price = new UI().new CustomLabel("Price: ");
-        JTextField priceIn = new UI().new CustomTextField(15);
-        JLabel stock = new UI().new CustomLabel("Stock: ");
-        JTextField stockIn = new UI().new CustomTextField(15);
+        JLabel descriptionNote = new CustomLabel("(Supports Markdown Syntax)");
+        JLabel price = new CustomLabel("Price: ");
+        JTextField priceIn = new CustomTextField(15);
+        JLabel stock = new CustomLabel("Stock: ");
+        JTextField stockIn = new CustomTextField(15);
 
-        JLabel image = new UI().new CustomLabel("Image: ");
+        JLabel image = new CustomLabel("Image: ");
         JFileChooser imageIn = new JFileChooser("~");
         imageIn.setAcceptAllFileFilterUsed(false);
         FileNameExtensionFilter filter = new FileNameExtensionFilter("images", "png", "jpg", "jpeg", "gif");
@@ -496,11 +564,11 @@ public class Views extends JFrame {
 
         File destination = new File("./data/" + loggedInClient.getId());
 
-        JButton imageButton = new UI().new CustomButton("Open");
-        JLabel status = new UI().new CustomLabel("None");
+        JButton imageButton = new CustomButton("Open");
+        JLabel status = new CustomLabel("None");
 
-        JButton sell = new UI().new CustomButton("Sell");
-        sell.setBackground(new UI().blue1);
+        JButton sell = new CustomButton("Sell");
+        sell.setBackground(BLUE1);
 
         imageButton.addActionListener(new ActionListener() {
 
@@ -510,7 +578,7 @@ public class Views extends JFrame {
                 if (retVal == JFileChooser.APPROVE_OPTION) {
                     file = imageIn.getSelectedFile();
                     status.setText(file.getName());
-                    imageButton.setBackground(new UI().green1);
+                    imageButton.setBackground(GREEN1);
                 } else {
                     status.setText("None");
                     file = null;
@@ -560,11 +628,11 @@ public class Views extends JFrame {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 } catch (NullPointerException n1) {
-                    imageButton.setBackground(new UI().red);
+                    imageButton.setBackground(RED);
                     n1.printStackTrace();
                 } catch (NumberFormatException num1) {
-                    price.setForeground(new UI().red);
-                    stock.setForeground(new UI().red);
+                    price.setForeground(RED);
+                    stock.setForeground(RED);
                     // num1.printStackTrace();
                 }
             }
@@ -590,17 +658,39 @@ public class Views extends JFrame {
 
     public JPanel account() {
         products = productService.fetchProductListByClient(loggedInClient.getId());
-        JPanel accountPnl = new UI().new CustomPanel();
+
+        JPanel accountPnl = new CustomPanel();
         accountPnl.setLayout(new BorderLayout());
-        JPanel accountNavPnl = new UI().new CustomPanel();
+
+        JPanel accountNavPnl = new CustomPanel();
         accountNavPnl.setBackground(new Color(52, 54, 78));
         accountNavPnl.setLayout(new MigLayout("", "[][]"));
-        JLabel totalListings = new UI().new CustomLabel("Total listings: " + products.size());
-        JLabel walletAmount = new UI().new CustomLabel("Wallet: " + loggedInClient.getWallet());
-        JButton addAmount = new UI().new CustomButton("+");
-        addAmount.setBackground(new UI().green0);
+
+        JLabel totalListings = new CustomLabel("Total listings: " + products.size());
+        JLabel totalOrders = new CustomLabel("Total Orders: " + clientOrders.size());
+
+        JLabel walletAmount = new CustomLabel(String.format("Wallet: %.2f", loggedInClient.getWallet()));
+
+        JButton addAmount = new CustomButton("+");
+        addAmount.setBackground(GREEN0);
+        addAmount.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double amount = Double.parseDouble(JOptionPane.showInputDialog(f, "Cash-In Amount"));
+                Client update = loggedInClient;
+                update.setWallet(update.getWallet() + amount);
+                clientRepository.save(update);
+                walletAmount.setText(String.format("Wallet: %.2f", loggedInClient.getWallet()));
+                mainPnl.revalidate();
+                mainPnl.repaint();
+
+            }
+
+        });
 
         accountNavPnl.add(totalListings);
+        accountNavPnl.add(totalOrders);
         accountNavPnl.add(walletAmount, "push, al right");
         accountNavPnl.add(addAmount);
 
@@ -610,25 +700,23 @@ public class Views extends JFrame {
 
     }
 
-    public void listings() {
-        bodyPnl = new UI().new CustomPanel();
-        bodyPnl.setLayout(new BorderLayout());
+    // public JPanel orders() {
+    // JPanel ordersPnl = new CustomPanel();
+    // ordersPnl.setLayout(new MigLayout());
 
-        mainPnl.add(nav(), BorderLayout.NORTH);
-        bodyPnl.add(card(), BorderLayout.CENTER);
+    // List<Product> productOrders = new ArrayList<>();
+    // clientOrders.forEach(order -> {
+    // order.getProducts().forEach(product -> productOrders.add(product));
+    // });
+    // // clientOrders.forEach(order -> {
+    // // productOrders.add(order.getProducts());
+    // // });
+    // myOrder = true;
+    // products = productOrders;
+    // redirect(card());
+    // return ordersPnl;
 
-        mainPnl.add(bodyPnl, BorderLayout.CENTER);
-
-        JScrollPane scroll = new JScrollPane(mainPnl);
-
-        add(scroll);
-        pack();
-        setVisible(true);
-        setSize(1000, 600);
-        setMinimumSize(new Dimension(880, 400));
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
+    // }
 
     public void redirect(JPanel panel) {
         bodyPnl.removeAll();
