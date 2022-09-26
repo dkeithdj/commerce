@@ -15,4 +15,6 @@ import com.proj.commerce.models.Client;
 public interface ProductRepository extends JpaRepository<Product, Long> {
   List<Product> findByClientId(Long id);
 
+  List<Product> findByStocksGreaterThan(Integer stocks);
+
 }
