@@ -126,7 +126,6 @@ public class Product {
 
   @Override
   public String toString() {
-    // TODO Auto-generated method stub
     return String.format("ID: %d\nTitle: %s\nSeller: %s", id, title, client.getUsername());
   }
 

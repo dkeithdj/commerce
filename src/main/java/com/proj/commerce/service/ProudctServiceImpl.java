@@ -17,13 +17,11 @@ public class ProudctServiceImpl implements ProductService {
 
   @Override
   public Product saveProduct(Product product) {
-    // TODO Auto-generated method stub
     return productRepository.save(product);
   }
 
   @Override
   public List<Product> fetchProductList() {
-    // TODO Auto-generated method stub
     return (List<Product>) productRepository.findAll();
   }
 
