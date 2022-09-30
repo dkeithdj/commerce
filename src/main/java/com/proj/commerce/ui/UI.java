@@ -21,6 +21,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
+import com.formdev.flatlaf.FlatClientProperties;
+
 public class UI {
   public final Color BG0 = new Color(36, 40, 59);
   public final Color BG1 = new Color(65, 72, 104);
@@ -51,26 +53,27 @@ public class UI {
 
   public class CustomPanel extends JPanel {
     public CustomPanel() {
-      setBackground(BG0);
+      // putClientProperty(FlatClientProperties.STYLE_CLASS, "roundedPanel");
+      // setBackground(BG0);
     }
 
   }
 
   public class CustomButton extends JButton {
     public CustomButton() {
-      setBackground(FG0);
-      setForeground(BG0);
-      setFocusPainted(false);
-      setFont(new Font("Tahoma", Font.PLAIN, 12));
+      // setBackground(FG0);
+      // setForeground(BG0);
+      // setFocusPainted(false);
+      // setFont(new Font("Tahoma", Font.PLAIN, 12));
 
     }
 
     public CustomButton(String text) {
       setText(text);
-      setBackground(FG0);
-      setForeground(BG0);
-      setFocusPainted(false);
-      setFont(new Font("Tahoma", Font.PLAIN, 12));
+      // setBackground(FG0);
+      // setForeground(BG0);
+      // setFocusPainted(false);
+      // setFont(new Font("Tahoma", Font.PLAIN, 12));
 
     }
 
@@ -78,7 +81,7 @@ public class UI {
 
   public class CustomLabel extends JLabel {
     public CustomLabel() {
-      setFont(new Font("Tahoma", Font.PLAIN, 14));
+      // setFont(new Font("Tahoma", Font.PLAIN, 14));
     }
 
     public void setHtmlText(String htmlText) {
@@ -88,8 +91,8 @@ public class UI {
 
     public CustomLabel(String text) {
       setText(text);
-      setForeground(FG1);
-      setFont(new Font("Tahoma", Font.PLAIN, 14));
+      // setForeground(FG1);
+      // setFont(new Font("Tahoma", Font.PLAIN, 14));
     }
 
   }
@@ -97,22 +100,22 @@ public class UI {
   public class CustomTextField extends JTextField {
     public CustomTextField(int columns) {
       setColumns(columns);
-      setBackground(BG1);
-      setForeground(FG1);
-      setCaretColor(BLUE0);
-      setBorder(BorderFactory.createLineBorder(BG0, 0));
-      setFont(new Font("Tahoma", Font.PLAIN, 14));
+      // setBackground(BG1);
+      // setForeground(FG1);
+      // setCaretColor(BLUE0);
+      // setBorder(BorderFactory.createLineBorder(BG0, 0));
+      // setFont(new Font("Tahoma", Font.PLAIN, 14));
     }
   }
 
   public class CustomPasswordField extends JPasswordField {
     public CustomPasswordField(int columns) {
       setColumns(columns);
-      setBackground(BG1);
-      setForeground(FG1);
-      setCaretColor(BLUE0);
-      setBorder(BorderFactory.createLineBorder(BG0, 0));
-      setFont(new Font("Tahoma", Font.PLAIN, 14));
+      // setBackground(BG1);
+      // setForeground(FG1);
+      // setCaretColor(BLUE0);
+      // setBorder(BorderFactory.createLineBorder(BG0, 0));
+      // setFont(new Font("Tahoma", Font.PLAIN, 14));
     }
   }
 
@@ -120,26 +123,27 @@ public class UI {
 
     public CustomSpinner(SpinnerNumberModel model) {
       setModel(model);
-      JComponent spinnerEditor = getEditor();
-      JFormattedTextField spinnerFormat = ((JSpinner.DefaultEditor) spinnerEditor).getTextField();
-      spinnerFormat.setColumns(3);
-      spinnerFormat.setEditable(false);
-      spinnerFormat.setFont(new Font("Tahoma", Font.PLAIN, 15));
-      spinnerFormat.setSize(500, 300);
-      int n = spinnerEditor.getComponentCount();
-      for (int i = 0; i < n; i++) {
-        Component c = spinnerEditor.getComponent(i);
-        if (c instanceof JFormattedTextField) {
-          c.setBackground(BG1);
-          c.setForeground(FG1);
+      // JComponent spinnerEditor = getEditor();
+      // JFormattedTextField spinnerFormat = ((JSpinner.DefaultEditor)
+      // spinnerEditor).getTextField();
+      // spinnerFormat.setColumns(3);
+      // spinnerFormat.setEditable(false);
+      // spinnerFormat.setFont(new Font("Tahoma", Font.PLAIN, 15));
+      // spinnerFormat.setSize(500, 300);
+      // int n = spinnerEditor.getComponentCount();
+      // for (int i = 0; i < n; i++) {
+      // Component c = spinnerEditor.getComponent(i);
+      // if (c instanceof JFormattedTextField) {
+      // c.setBackground(BG1);
+      // c.setForeground(FG1);
 
-        }
-        if (c instanceof JButton) {
-          c.setBackground(BG1);
-          c.setForeground(FG1);
+      // }
+      // if (c instanceof JButton) {
+      // c.setBackground(BG1);
+      // c.setForeground(FG1);
 
-        }
-      }
+      // }
+      // }
     }
 
   }

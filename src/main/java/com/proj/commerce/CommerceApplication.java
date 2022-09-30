@@ -3,16 +3,23 @@ package com.proj.commerce;
 import java.awt.Dimension;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import com.proj.commerce.models.Product;
-import com.proj.commerce.models.Client;
-import com.proj.commerce.repositories.ProductRepository;
-import com.proj.commerce.repositories.ClientRepository;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkHardIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkContrastIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightContrastIJTheme;
 
 @SpringBootApplication
 public class CommerceApplication extends JFrame {
@@ -21,14 +28,16 @@ public class CommerceApplication extends JFrame {
 	// @Autowired
 	// private ProductRepository productRepository;
 
-	public static void main(String[] args) {
-		ConfigurableApplicationContext configurableApplicationContext = SpringApplication.run(CommerceApplication.class,
+	public static void main(final String[] args) {
+		SpringApplication.run(CommerceApplication.class,
 				args);
 		// SpringApplication.run(CommerceApplication.class,
 		// args);
 
-		ClientRepository clientRepository = configurableApplicationContext.getBean(ClientRepository.class);
-		ProductRepository productRepository = configurableApplicationContext.getBean(ProductRepository.class);
+		// ClientRepository clientRepository =
+		// configurableApplicationContext.getBean(ClientRepository.class);
+		// ProductRepository productRepository =
+		// configurableApplicationContext.getBean(ProductRepository.class);
 		// Client foo = new Client("foo", "foo01", 10000);
 		// Client bar = new Client("bar", "bar01", 100000);
 		// Client baz = new Client("baz", "baz01", 100000);
@@ -63,12 +72,18 @@ public class CommerceApplication extends JFrame {
 
 		// productRepository.save(case40);
 		// productRepository.save(pcb);
+		// CoreManagers.initialize();
+		FlatLaf.registerCustomDefaultsSource("com.proj.commerce.ui");
+		// FlatDarkLaf.setup();
+		// FlatGruvboxDarkHardIJTheme.setup();
+		FlatAtomOneDarkContrastIJTheme.setup();
+		// FlatAtomOneLightContrastIJTheme.setup();
+		// UIManager.put("Panel.arc", 999);
 
 		new Views();
 
 		// view.setProducts(productRepository.findAll());
 		// view.setUsers(clientRepository.findAll());
-
 	}
 
 }
