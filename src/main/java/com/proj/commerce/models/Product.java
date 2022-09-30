@@ -1,25 +1,14 @@
 package com.proj.commerce.models;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import org.springframework.lang.Nullable;
 
 @Entity
 @Table(name = "product")
@@ -43,10 +32,6 @@ public class Product {
   private LocalDateTime date;
 
   private int stocks;
-
-  // @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
-  // @Nullable
-  // private List<Order> orders = new ArrayList<>();
 
   public Product() {
   }

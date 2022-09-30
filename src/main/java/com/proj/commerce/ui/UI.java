@@ -1,27 +1,19 @@
 package com.proj.commerce.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-
-import com.formdev.flatlaf.FlatClientProperties;
 
 public class UI {
   public final Color BG0 = new Color(36, 40, 59);
@@ -39,9 +31,10 @@ public class UI {
   public final Color FG0 = new Color(169, 177, 214);
   public final Color FG1 = new Color(192, 202, 245);
 
+  // TODO will figure out if this class is still relevant due to the newly
+  // implemented Look and Feel
   public final String styleSheet() {
     Path stylesLoc = Path.of("./static/styles.css");
-    // String styles = "";
     try {
       return Files.readString(stylesLoc);
     } catch (IOException e1) {

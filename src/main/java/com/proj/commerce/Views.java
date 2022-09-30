@@ -97,7 +97,6 @@ public class Views extends UI {
 
         mainPnl.add(nav(), BorderLayout.NORTH);
         bodyPnl.add(home(), BorderLayout.CENTER);
-        // bodyPnl.add(card(), BorderLayout.CENTER);
 
         JScrollPane scroll = new JScrollPane(bodyPnl);
         scroll.putClientProperty(FlatClientProperties.STYLE_CLASS, "scroll");
@@ -180,12 +179,9 @@ public class Views extends UI {
             cardPnl.add(itemDesc, "grow");
 
             cardPnl.putClientProperty(FlatClientProperties.STYLE_CLASS, "roundedPanel");
-            // cardPnl.setBackground(null);
             cardPnl.setMaximumSize(new Dimension(200, 350));
             cardPnl.setPreferredSize(new Dimension(200, 350));
             cardPnl.setBorder(new FlatLineBorder(new Insets(16, 16, 16, 16), BG0, 1, 12));
-            // cardPnl.setBorder(BorderFactory.createLineBorder(new Color(0, 70, 135), 1));
-            // cardPnl.setBackground(BG1);
             cardList.add(cardPnl);
 
             cardPnl.addMouseListener(mm);
@@ -360,26 +356,9 @@ public class Views extends UI {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // List<Product> productOrders = new ArrayList<>();
-                // clientOrders.forEach(order -> {
-                // order.getProducts().forEach(product -> productOrders.add(product));
-                // });
-                // clientOrders.forEach(order -> {
-                // productOrders.add(order.getProducts());
-                // });
-
-                // List<Long> idsFromClient = clientOrders.stream().map(order -> order.getId())
-                // .collect(Collectors.toList());
-
                 myOrder = true;
                 products = orderService.fetchProductsByClientId(loggedInClient.getId());
-                // // System.out.println(products.size());
-                // for (int i = 0; i < idsFromClient.size(); i++) {
-                // productOrderMap.put(products.get(i), idsFromClient.get(i));
-                // }
-                // System.out.println(productOrderMap);
                 redirect(card());
-                // productOrders.clear();
 
             }
 
@@ -387,9 +366,6 @@ public class Views extends UI {
 
         loginButton = new JButton("Login");
         loginButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "blue");
-
-        // loginButton.setBackground(GREEN0);
-
         loginButton.addActionListener(new ActionListener() {
 
             @Override
@@ -401,8 +377,6 @@ public class Views extends UI {
         });
         logoutButton = new JButton("Logout");
         logoutButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "red");
-        // logoutButton.setBackground(RED);
-
         logoutButton.addActionListener(new ActionListener() {
 
             @Override
@@ -422,17 +396,8 @@ public class Views extends UI {
         });
 
         registerButton = new JButton("Register");
-        // registerButton.setBackground(ORANGE0);
         registerButton.addActionListener(new UI().redirectListener(mainPnl, bodyPnl, registerForm()));
         registerButton.putClientProperty(FlatClientProperties.STYLE_CLASS, "yellow");
-        // registerButton.addActionListener(new ActionListener() {
-
-        // @Override
-        // public void actionPerformed(ActionEvent e) {
-        // redirect(registerForm());
-        // }
-
-        // });
 
         navPnl.add(title);
 
@@ -447,18 +412,15 @@ public class Views extends UI {
         pnl.setLayout(new MigLayout("align center"));
 
         JLabel username = new CustomLabel("Username: ");
-        // JTextField usernameIn = new CustomTextField(15);
         JTextField usernameIn = new JTextField(15);
 
         JLabel password = new CustomLabel("Password: ");
-        // JPasswordField passwordIn = new CustomPasswordField(15);
         JPasswordField passwordIn = new JPasswordField(15);
 
         JLabel status = new CustomLabel("");
 
         JButton login = new CustomButton("Login");
         login.putClientProperty(FlatClientProperties.STYLE_CLASS, "green");
-        // login.setBackground(GREEN0);
         login.addActionListener(new ActionListener() {
 
             @Override
