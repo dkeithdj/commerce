@@ -30,10 +30,12 @@ public class Order {
   @JoinColumn(name = "client_id")
   private Client client;
 
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.EAGER)
   @Nullable
-  @JoinTable(name = "order_product", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
-  private List<Product> products = new ArrayList<>();
+  private Product products;
+  // private List<Product> products = new ArrayList<>();
+  // @JoinTable(name = "order_product", joinColumns = @JoinColumn(name =
+  // "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
 
   private int quantity;
 
@@ -60,11 +62,11 @@ public class Order {
     this.client = client;
   }
 
-  public List<Product> getProducts() {
+  public Product getProducts() {
     return products;
   }
 
-  public void setProducts(List<Product> products) {
+  public void setProducts(Product products) {
     this.products = products;
   }
 

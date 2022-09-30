@@ -44,9 +44,9 @@ public class Product {
 
   private int stocks;
 
-  @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
-  @Nullable
-  private List<Order> orders = new ArrayList<>();
+  // @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
+  // @Nullable
+  // private List<Order> orders = new ArrayList<>();
 
   public Product() {
   }
@@ -116,17 +116,21 @@ public class Product {
     this.stocks = stocks;
   }
 
-  public List<Order> getOrders() {
-    return orders;
-  }
+  // public List<Order> getOrders() {
+  // return orders;
+  // }
 
-  public void setOrders(List<Order> orders) {
-    this.orders = orders;
-  }
+  // public void setOrders(List<Order> orders) {
+  // this.orders = orders;
+  // }
 
   @Override
   public String toString() {
     return String.format("ID: %d\nTitle: %s\nSeller: %s", id, title, client.getUsername());
+  }
+
+  public Object stream() {
+    return null;
   }
 
 }

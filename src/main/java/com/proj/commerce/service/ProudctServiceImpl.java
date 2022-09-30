@@ -55,4 +55,9 @@ public class ProudctServiceImpl implements ProductService {
     return productRepository.findByStocksGreaterThan(0);
   }
 
+  @Override
+  public List<Product> fetchProductListBySearch(String search) {
+    return productRepository.findByTitleContainsAndStocksGreaterThan(search, 0);
+  }
+
 }

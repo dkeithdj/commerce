@@ -12,5 +12,5 @@ public interface OrderService {
 
   List<Product> fetchProductsByClientId(Long client_id);
 
-  Order fetchOrderByClientIdAndProductId(Long client_id, Long product_id);
+  List<Order> fetchOrderByClientIdAndProductId(Long client_id, Long product_id);
 }

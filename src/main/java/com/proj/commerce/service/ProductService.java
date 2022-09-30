@@ -13,6 +13,8 @@ public interface ProductService {
 
   List<Product> fetchProductListByStocks();
 
+  List<Product> fetchProductListBySearch(String search);
+
   Product updateProduct(Product product, Long productId);
 
   void deleteProductById(Long productId);

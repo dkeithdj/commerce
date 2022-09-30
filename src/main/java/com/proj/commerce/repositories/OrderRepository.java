@@ -15,7 +15,7 @@ import com.proj.commerce.models.Product;
 public interface OrderRepository extends JpaRepository<Order, Long> {
   List<Order> findByClientId(Long client_id);
 
-  Order findByClientIdAndProductsId(Long client_id, Long product_id);
+  List<Order> findByClientIdAndProductsId(Long client_id, Long product_id);
 
   // @Query(value = "SELECT * FROM ORDER_PRODUCT")
   // List<Order> getOrders();

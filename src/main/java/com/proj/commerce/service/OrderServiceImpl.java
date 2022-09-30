@@ -28,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Order fetchOrderByClientIdAndProductId(Long client_id, Long product_id) {
+  public List<Order> fetchOrderByClientIdAndProductId(Long client_id, Long product_id) {
     // clientOrders.forEach(order -> {
     // order.getProducts().forEach(product -> productOrders.add(product));
     // });
@@ -37,8 +37,13 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public List<Product> fetchProductsByClientId(Long client_id) {
-    return orderRepository.findByClientId(client_id).stream().flatMap(orders -> orders.getProducts().stream())
+    return orderRepository.findByClientId(client_id).stream().map(order -> order.getProducts())
         .collect(Collectors.toList());
+    // return orderRepository.findByClientId(client_id).stream().flatMap(orders ->
+    // orders.getProducts().); // return
+    // orderRepository.findByClientId(client_id).stream().flatMap(orders ->
+    // orders.getProducts())
+    // .collect(Collectors.toList());
   }
 
 }
